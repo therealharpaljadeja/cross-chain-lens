@@ -7,32 +7,35 @@ import "./interfaces/IWormholeReceiver.sol";
 contract LensProtocolReceiver is IWormholeReceiver {
     IWormholeRelayer public immutable wormholeRelayer;
     address public immutable mockProfileCreationProxy;
+    address public immutable lensHub;
 
-    struct CreateProfileData {
-        address to;
-        string handle;
-        string imageURI;
-        address followModule;
-        bytes followModuleInitData;
-        string followNFTURI;
-    }
-
-    constructor(address _wormholeRelayer, address _mockProfileCreationProxy) {
+    constructor(
+        address _wormholeRelayer,
+        address _mockProfileCreationProxy,
+        address _lensHub
+    ) {
         wormholeRelayer = IWormholeRelayer(_wormholeRelayer);
         mockProfileCreationProxy = _mockProfileCreationProxy;
+        lensHub = _lensHub;
     }
 
     function receiveWormholeMessages(
-        bytes memory payload,
+        bytes calldata payload,
         bytes[] memory, // additionalVaas
-        bytes32, // address that called 'sendPayloadToEvm' (HelloWormhole contract address)
+        bytes32,
         uint16,
         bytes32 // deliveryHash
     ) public payable override {
         require(msg.sender == address(wormholeRelayer), "Only relayer allowed");
-        // (bytes4 signature, address to, string memory handle, string memory profileImageURI, address followModule, bytes memory followModuleInitData, string memory followNFTURI) = abi.decode(payload, (bytes4, address, string, string, address,bytes,string));
-        // CreateProfileData memory profileData = CreateProfileData(to, handle, profileImageURI, followModule, followModuleInitData, followNFTURI);
-        (bool success, ) = mockProfileCreationProxy.call(payload);
-        require(success, "Profile Creation Failed");
+        bytes4 signature = abi.decode(payload[0:4], (bytes4));
+
+        if (signature == 0x07e5f948) {
+            (bool success, ) = mockProfileCreationProxy.call(payload);
+            require(success, "Profile Creation Failed");
+        }
+        // else {
+        // (bool success, ) = lensHub.call(payload);
+        // require(success, "Call Failed");
+        // }
     }
 }

@@ -6,22 +6,13 @@ import "./interfaces/IWormholeRelayer.sol";
 contract LensProtocolRelayer {
     IWormholeRelayer public immutable wormholeRelayer;
 
-    struct CreateProfileData {
-        address to;
-        string handle;
-        string imageURI;
-        address followModule;
-        bytes followModuleInitData;
-        string followNFTURI;
-    }
-
     uint256 constant GAS_LIMIT = 5_000_000;
 
     constructor(address _wormholeRelayer) {
         wormholeRelayer = IWormholeRelayer(_wormholeRelayer);
     }
 
-    function quoteCrossChainGreeting(
+    function quoteCrossChainLensCall(
         uint16 targetChain
     ) public view returns (uint256 cost) {
         (cost, ) = wormholeRelayer.quoteEVMDeliveryPrice(
@@ -31,22 +22,24 @@ contract LensProtocolRelayer {
         );
     }
 
-    function sendCrossChainGreeting(
+    function sendCrossChainLensCall(
         uint16 targetChain,
         address targetAddress,
-        CreateProfileData memory profileData
+        bytes memory payload
     ) public payable {
-        uint256 cost = quoteCrossChainGreeting(targetChain);
+        uint256 cost = quoteCrossChainLensCall(targetChain);
         require(msg.value == cost);
         wormholeRelayer.sendPayloadToEvm{value: cost}(
             targetChain,
             targetAddress,
-            abi.encodeWithSignature(
-                "proxyCreateProfile((address,string,string,address,bytes,string))",
-                profileData
-            ), // payload
+            payload,
             0, // no receiver value needed since we're just passing a message
             GAS_LIMIT
         );
     }
 }
+
+//  abi.encodeWithSignature(
+//                 "proxyCreateProfile((address,string,string,address,bytes,string))",
+//                 profileData
+//             ),
