@@ -38,8 +38,3 @@ contract LensProtocolRelayer {
         );
     }
 }
-
-//  abi.encodeWithSignature(
-//                 "proxyCreateProfile((address,string,string,address,bytes,string))",
-//                 profileData
-//             ),
