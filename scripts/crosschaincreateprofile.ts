@@ -18,19 +18,17 @@ async function main() {
     let payload = await iface.encodeFunctionData("proxyCreateProfile", [
         [
             deployer.address,
-            "dummyprofiletesting12345678",
-            "https://ipfs.thirdwebstorage.com/ipfs/QmZWRrxaesV3gu4mLnqTe4AnuHjF1iobbHvLD4CxUziqDx/FCFF52.png",
-            "0x0000000000000000000000000000000000000000",
-            "0x",
-            "https://ipfs.thirdwebstorage.com/ipfs/QmZWRrxaesV3gu4mLnqTe4AnuHjF1iobbHvLD4CxUziqDx/FCFF52.png",
+            "fromcelo", // username
+            "https://ipfs.thirdwebstorage.com/ipfs/QmZWRrxaesV3gu4mLnqTe4AnuHjF1iobbHvLD4CxUziqDx/FCFF52.png", // profilePicture
+            "0x0000000000000000000000000000000000000000", // Follow Module
+            "0x", // Follow Module Init Data
+            "https://ipfs.thirdwebstorage.com/ipfs/QmZWRrxaesV3gu4mLnqTe4AnuHjF1iobbHvLD4CxUziqDx/FCFF52.png", // Follow NFT Image
         ],
     ]);
 
-    console.log(payload);
-
     let tx = await lensProtocolRelayer.sendCrossChainLensCall(
         5,
-        "0xAccC59dB36b8695506ccBd1Be3D50D4e71b76034", // LensProtocolReceiver
+        "0x176f0554302a180815693fB648F7014Dfc59016a", // LensProtocolReceiver
         payload,
         {
             value,
