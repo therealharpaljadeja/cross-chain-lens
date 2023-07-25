@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-// 0xf8c30aFE9cC217BAc6D0DC5FF574c377eAe82238
+// 0x9B6dd6d5E4F44f8c45Db4222d712e4DFEb64Cfbf
 
 async function main() {
     const ALFAJORES_RELAYER = "0x306B68267Deb7c5DfCDa3619E22E9Ca39C374f84";
