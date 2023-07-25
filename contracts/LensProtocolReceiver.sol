@@ -27,15 +27,19 @@ contract LensProtocolReceiver is IWormholeReceiver {
         bytes32 // deliveryHash
     ) public payable override {
         require(msg.sender == address(wormholeRelayer), "Only relayer allowed");
-        bytes4 signature = abi.decode(payload[0:4], (bytes4));
+        bytes4 signature = bytes4(payload);
 
         if (signature == 0x07e5f948) {
             (bool success, ) = mockProfileCreationProxy.call(payload);
             require(success, "Profile Creation Failed");
+        } else {
+            (bool success, bytes memory result) = lensHub.call(payload);
+            if (!success) {
+                assembly {
+                    // We use Yul's revert() to bubble up errors from the target contract.
+                    revert(add(32, result), mload(result))
+                }
+            }
         }
-        // else {
-        // (bool success, ) = lensHub.call(payload);
-        // require(success, "Call Failed");
-        // }
     }
 }

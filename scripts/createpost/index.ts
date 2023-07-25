@@ -10,6 +10,7 @@ async function main() {
     const address = await wallet.getAddress();
     const lensClient = await getAuthenticatedClient(wallet);
     const profile = await getActiveProfile(lensClient, address);
+
     const profileId = profile.id;
 
     const metadata = buildPublicationMetadata();
@@ -32,50 +33,64 @@ async function main() {
             contentURI,
         });
 
-    const createPostTypedDataValue = createPostTypedDataResult.unwrap();
+    const { typedData } = createPostTypedDataResult.unwrap();
 
-    console.log(
-        `createDataAvailabilityPostTypedData result: `,
-        createPostTypedDataValue
-    );
+    const { domain, types, value } = typedData;
+
+    const {
+        collectModule,
+        collectModuleInitData,
+        referenceModule,
+        referenceModuleInitData,
+        deadline,
+    } = value;
+
+    // Deadline adjustment, workaround for SignatureExpired() error
+    value.deadline = (Math.round(Date.now() / 1000) + 24 * 60 * 60).toString();
 
     // sign with the wallet
-    const signedTypedData = await wallet._signTypedData(
-        createPostTypedDataValue.typedData.domain,
-        createPostTypedDataValue.typedData.types,
-        createPostTypedDataValue.typedData.value
-    );
+    const signedTypedData = await wallet._signTypedData(domain, types, value);
 
     const { v, r, s } = ethers.utils.splitSignature(signedTypedData);
 
     const lensProtocolRelayer = await ethers.getContractAt(
         "LensProtocolRelayer",
-        "0xf8c30aFE9cC217BAc6D0DC5FF574c377eAe82238"
+        "0x3681f10B359879bCe8b29244EBB02F60a219C172"
     );
 
-    let value = await lensProtocolRelayer.quoteCrossChainGreeting(5);
+    let txValue = await lensProtocolRelayer.quoteCrossChainLensCall(5);
+
+    // Encoding payload for postWithSig
+    let ABI = [
+        "function postWithSig((uint256,string,address,bytes,address,bytes,(uint8,bytes32,bytes32,uint256)))",
+    ];
+
+    let iface = new ethers.utils.Interface(ABI);
+
+    let payload = await iface.encodeFunctionData("postWithSig", [
+        [
+            profileId,
+            contentURI,
+            collectModule,
+            collectModuleInitData,
+            referenceModule,
+            referenceModuleInitData,
+            [v, r, s, value.deadline],
+        ],
+    ]);
+
+    console.log(`Deadline: ${deadline}`);
 
     let tx = await lensProtocolRelayer.sendCrossChainLensCall(
         5,
-        "0xD7ae4AcEf9d1388bF09A9EC072f9D99ed77cad7A", // LensProtocolReceiver
+        "0x176f0554302a180815693fB648F7014Dfc59016a", // LensProtocolReceiver
+        payload,
         {
-            to: deployer.address,
-            handle: "dummyprofiletesting12345",
-            followModule: "0x0000000000000000000000000000000000000000",
-            followModuleInitData: "0x",
-            followNFTURI:
-                "https://ipfs.thirdwebstorage.com/ipfs/QmZWRrxaesV3gu4mLnqTe4AnuHjF1iobbHvLD4CxUziqDx/FCFF52.png",
-            imageURI:
-                "https://ipfs.thirdwebstorage.com/ipfs/QmZWRrxaesV3gu4mLnqTe4AnuHjF1iobbHvLD4CxUziqDx/FCFF52.png",
-        },
-        {
-            value,
+            value: txValue,
         }
     );
 
     console.log(`Transaction: ${tx.hash}`);
-
-    // encodeWithSignature
 }
 
 main();
