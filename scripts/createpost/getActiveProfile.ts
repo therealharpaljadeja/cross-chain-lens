@@ -6,7 +6,7 @@ export async function getActiveProfile(
 ): Promise<ProfileFragment> {
     const ownedProfiles = await client.profile.fetchAll({
         ownedBy: [walletAddress],
-        limit: 5,
+        limit: 10,
     });
 
     if (ownedProfiles.items.length === 0) {
