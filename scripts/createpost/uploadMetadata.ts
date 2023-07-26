@@ -12,8 +12,5 @@ export async function uploadMetadata(metadata: PublicationMetadataV2Input) {
     // Here we a URL with a gateway that we can look at in the browser
     const url = await storage.resolveScheme(uri);
 
-    // This will log a URL like https://ipfs.thirdwebstorage.com/ipfs/QmWgbcjKWCXhaLzMz4gNBxQpAHktQK6MkLvBkKXbsoWEEy/0
-    console.info(url);
-
     return url;
 }

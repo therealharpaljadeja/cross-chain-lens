@@ -55,7 +55,7 @@ async function main() {
 
     const lensProtocolRelayer = await ethers.getContractAt(
         "LensProtocolRelayer",
-        "0x3681f10B359879bCe8b29244EBB02F60a219C172"
+        "0xEc82d87B502c9450B2fE49888F6495931Bc9ca6a"
     );
 
     let txValue = await lensProtocolRelayer.quoteCrossChainLensCall(5);
@@ -79,11 +79,9 @@ async function main() {
         ],
     ]);
 
-    console.log(`Deadline: ${deadline}`);
-
     let tx = await lensProtocolRelayer.sendCrossChainLensCall(
-        5,
-        "0x176f0554302a180815693fB648F7014Dfc59016a", // LensProtocolReceiver
+        5, // Mumbai
+        "0x463395C97425510161f3dE8bcEBD6D4596F02Fbe", // LensProtocolReceiver
         payload,
         {
             value: txValue,
