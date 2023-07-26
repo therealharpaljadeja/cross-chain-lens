@@ -4,7 +4,7 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     const lensProtocolRelayer = await ethers.getContractAt(
         "LensProtocolRelayer",
-        "0x9B6dd6d5E4F44f8c45Db4222d712e4DFEb64Cfbf"
+        "0xEc82d87B502c9450B2fE49888F6495931Bc9ca6a"
     );
 
     let value = await lensProtocolRelayer.quoteCrossChainLensCall(5);
@@ -18,7 +18,7 @@ async function main() {
     let payload = await iface.encodeFunctionData("proxyCreateProfile", [
         [
             deployer.address,
-            "fromcelo", // username
+            "celowormholedemo1", // username
             "https://ipfs.thirdwebstorage.com/ipfs/QmZWRrxaesV3gu4mLnqTe4AnuHjF1iobbHvLD4CxUziqDx/FCFF52.png", // profilePicture
             "0x0000000000000000000000000000000000000000", // Follow Module
             "0x", // Follow Module Init Data
@@ -27,8 +27,8 @@ async function main() {
     ]);
 
     let tx = await lensProtocolRelayer.sendCrossChainLensCall(
-        5,
-        "0x176f0554302a180815693fB648F7014Dfc59016a", // LensProtocolReceiver
+        5, // Mumbai
+        "0x463395C97425510161f3dE8bcEBD6D4596F02Fbe", // LensProtocolReceiver
         payload,
         {
             value,
